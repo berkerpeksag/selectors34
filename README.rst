@@ -2,16 +2,17 @@
 selectors34
 ===========
 
-selectors34 is a backport of the selectors module from Python 3.4.
+*selectors34* is a backport of the selectors module from Python 3.4. The
+selectors module written by Charles-François Natali.
 
 Installation and Usage
 ----------------------
 
-To install ``selectors34`` via pip::
+To install *selectors34* via pip::
 
     $ pip install selectors34
 
-For best compatibility for Python 3.4, import ``selectors34`` like::
+For best compatibility for Python 3.4, import *selectors34* like::
 
     try:
         import selectors
