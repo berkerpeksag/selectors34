@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='selectors',
+    name='selectors34',
     version='1.0',
 
     description='Backport of the selectors module from Python 3.4.',
