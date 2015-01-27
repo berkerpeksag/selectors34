@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='selectors34',
@@ -13,6 +13,6 @@ setup(
 
     ],
     zip_safe=False,
-    packages=find_packages(),
+    py_modules=['selectors34'],
     include_package_data=True,
 )
