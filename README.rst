@@ -7,7 +7,7 @@ selectors34 is a backport of the selectors module from Python 3.4.
 Installation and Usage
 ----------------------
 
-To install `selectors34`` via pip::
+To install ``selectors34`` via pip::
 
     $ pip install selectors34
 
