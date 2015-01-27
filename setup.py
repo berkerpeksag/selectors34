@@ -28,4 +28,5 @@ setup(
     zip_safe=False,
     py_modules=['selectors34'],
     include_package_data=True,
+    install_requires=['six'],
 )
