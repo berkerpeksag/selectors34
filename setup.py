@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import io
 
 from setuptools import setup
@@ -13,8 +15,10 @@ setup(
     version='1.0',
     description='Backport of the selectors module from Python 3.4.',
     long_description=long_description,
-    author='Berker Peksag',
-    author_email='berker.peksag@gmail.com',
+    author='Charles-François Natali',
+    author_email='c.f.natali@gmail.com',
+    maintainer='Berker Peksag',
+    maintainer_email='berker.peksag@gmail.com',
     license='Python Software Foundation License',
     url='https://github.com/berkerpeksag/selectors34',
     classifiers=[
