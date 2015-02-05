@@ -3,14 +3,14 @@ testenv:
 	pip install -r requirements-dev.txt
 
 release:
-	python setup.py sdist upload -r pypi
+	python setup.py sdist bdist_wheel upload -r pypi
 
 register:
 	python setup.py register -r pypi
 
 # Test it via `pip install -i https://testpypi.python.org/pypi <project_name>`
 test-release:
-	python setup.py sdist upload -r test
+	python setup.py sdist bdist_wheel upload -r test
 
 test-register:
 	python setup.py register -r test
