@@ -1,0 +1,4 @@
+# minimal requirements to run the tests and make a release
+
+tox
+wheel
