@@ -16,9 +16,8 @@ test-register:
 	python setup.py register -r test
 
 clean:
-	find . -name "*.pyc" -exec rm {} \;
-	rm -rf *.egg-info
-	rm -rf build/ dist/
-	rm MANIFEST
+	@find . -name "*.pyc" -exec rm {} \;
+	@rm -rf *.egg-info
+	@rm -rf build/ dist/ .tox
 
 .PHONY: clean register test-register release test-release
