@@ -12,7 +12,7 @@ with io.open('CHANGELOG.rst', encoding='utf-8') as fobj:
 
 setup(
     name='selectors34',
-    version='1.0',
+    version='1.1',
     description='Backport of the selectors module from Python 3.4.',
     long_description=long_description,
     author='Charles-François Natali',
