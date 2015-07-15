@@ -9,14 +9,12 @@ The following code adapted from trollius.selectors.
 
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, Mapping
+from errno import EINTR
 import math
 import select
 import sys
 
 import six
-
-# compatibility code
-PY33 = (sys.version_info >= (3, 3))
 
 
 def _wrap_error(exc, mapping, key):
@@ -32,95 +30,6 @@ def _wrap_error(exc, mapping, key):
         traceback = sys.exc_info()[2]
     six.reraise(new_err_cls, new_err, traceback)
 
-
-if PY33:
-    import builtins
-
-    BlockingIOError = builtins.BlockingIOError
-    BrokenPipeError = builtins.BrokenPipeError
-    ChildProcessError = builtins.ChildProcessError
-    ConnectionRefusedError = builtins.ConnectionRefusedError
-    ConnectionResetError = builtins.ConnectionResetError
-    InterruptedError = builtins.InterruptedError
-    ConnectionAbortedError = builtins.ConnectionAbortedError
-    PermissionError = builtins.PermissionError
-    FileNotFoundError = builtins.FileNotFoundError
-    ProcessLookupError = builtins.ProcessLookupError
-
-    def wrap_error(func, *args, **kw):
-        return func(*args, **kw)
-else:
-    import errno
-    import select
-    import socket
-
-    class BlockingIOError(OSError):
-        pass
-
-    class BrokenPipeError(OSError):
-        pass
-
-    class ChildProcessError(OSError):
-        pass
-
-    class ConnectionRefusedError(OSError):
-        pass
-
-    class InterruptedError(OSError):
-        pass
-
-    class ConnectionResetError(OSError):
-        pass
-
-    class ConnectionAbortedError(OSError):
-        pass
-
-    class PermissionError(OSError):
-        pass
-
-    class FileNotFoundError(OSError):
-        pass
-
-    class ProcessLookupError(OSError):
-        pass
-
-    _MAP_ERRNO = {
-        errno.EACCES: PermissionError,
-        errno.EAGAIN: BlockingIOError,
-        errno.EALREADY: BlockingIOError,
-        errno.ECHILD: ChildProcessError,
-        errno.ECONNABORTED: ConnectionAbortedError,
-        errno.ECONNREFUSED: ConnectionRefusedError,
-        errno.ECONNRESET: ConnectionResetError,
-        errno.EINPROGRESS: BlockingIOError,
-        errno.EINTR: InterruptedError,
-        errno.ENOENT: FileNotFoundError,
-        errno.EPERM: PermissionError,
-        errno.EPIPE: BrokenPipeError,
-        errno.ESHUTDOWN: BrokenPipeError,
-        errno.EWOULDBLOCK: BlockingIOError,
-        errno.ESRCH: ProcessLookupError,
-    }
-
-    def wrap_error(func, *args, **kw):
-        """
-        Wrap socket.error, IOError, OSError, select.error to raise new specialized
-        exceptions of Python 3.3 like InterruptedError (PEP 3151).
-        """
-        try:
-            return func(*args, **kw)
-        except (socket.error, IOError, OSError) as exc:
-            if hasattr(exc, 'winerror'):
-                _wrap_error(exc, _MAP_ERRNO, exc.winerror)
-                # _MAP_ERRNO does not contain all Windows errors.
-                # For some errors like "file not found", exc.errno should
-                # be used (ex: ENOENT).
-            _wrap_error(exc, _MAP_ERRNO, exc.errno)
-            raise
-        except select.error as exc:
-            if exc.args:
-                _wrap_error(exc, _MAP_ERRNO, exc.args[0])
-            raise
 
 # generic events, that must be mapped to implementation-specific ones
 EVENT_READ = (1 << 0)
@@ -421,10 +330,12 @@ class SelectSelector(_BaseSelectorImpl):
         timeout = None if timeout is None else max(timeout, 0)
         ready = []
         try:
-            r, w, _ = wrap_error(self._select,
-                                 self._readers, self._writers, [], timeout)
-        except InterruptedError:
-            return ready
+            r, w, _ = self._select(self._readers, self._writers, [], timeout)
+        except select.error as exc:
+            if exc.args[0] == EINTR:
+                return ready
+            else:
+                raise
         r = set(r)
         w = set(w)
         for fd in r | w:
@@ -475,9 +386,12 @@ if hasattr(select, 'poll'):
                 timeout = int(math.ceil(timeout * 1e3))
             ready = []
             try:
-                fd_event_list = wrap_error(self._poll.poll, timeout)
-            except InterruptedError:
-                return ready
+                fd_event_list = self._poll.poll(timeout)
+            except select.error as exc:
+                if exc.args[0] == EINTR:
+                    return ready
+                else:
+                    raise
             for fd, event in fd_event_list:
                 events = 0
                 if event & ~select.POLLIN:
@@ -540,9 +454,12 @@ if hasattr(select, 'epoll'):
 
             ready = []
             try:
-                fd_event_list = wrap_error(self._epoll.poll, timeout, max_ev)
-            except InterruptedError:
-                return ready
+                fd_event_list = self._epoll.poll(timeout, max_ev)
+            except IOError as exc:
+                if exc.errno == EINTR:
+                    return ready
+                else:
+                    raise
             for fd, event in fd_event_list:
                 events = 0
                 if event & ~select.EPOLLIN:
@@ -599,8 +516,11 @@ if hasattr(select, 'devpoll'):
             ready = []
             try:
                 fd_event_list = self._devpoll.poll(timeout)
-            except InterruptedError:
-                return ready
+            except OSError as exc:
+                if exc.errno == EINTR:
+                    return ready
+                else:
+                    raise
             for fd, event in fd_event_list:
                 events = 0
                 if event & ~select.POLLIN:
@@ -668,10 +588,12 @@ if hasattr(select, 'kqueue'):
             max_ev = len(self._fd_to_key)
             ready = []
             try:
-                kev_list = wrap_error(self._kqueue.control,
-                                      None, max_ev, timeout)
-            except InterruptedError:
-                return ready
+                kev_list = self._kqueue.control(None, max_ev, timeout)
+            except OSError as exc:
+                if exc.errno == EINTR:
+                    return ready
+                else:
+                    raise
             for kev in kev_list:
                 fd = kev.ident
                 flag = kev.filter
