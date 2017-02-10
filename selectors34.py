@@ -85,8 +85,10 @@ class _SelectorMapping(Mapping):
     def __iter__(self):
         return iter(self._selector._fd_to_key)
 
-
-class BaseSelector(six.with_metaclass(ABCMeta)):
+# Using six.add_metaclass() decorator instead of six.with_metaclass() because
+# the latter leaks temporary_class to garbage with gc disabled
+@six.add_metaclass(ABCMeta)
+class BaseSelector(object):
     """Selector abstract base class.
 
     A selector supports registering file objects to be monitored for specific
