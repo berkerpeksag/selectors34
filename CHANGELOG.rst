@@ -1,6 +1,18 @@
 Changelog
 =========
 
+1.2 (not released yet)
+----------------------
+
+* Pull request #3: ``wrap_error()`` compatibility layer for PEP 3151 has been
+  removed.
+  (Patch written by Victor Stinner.)
+* Pull request #4: Fix ``TypeError`` when ``select.select()`` is monkeypatched
+  by Gevent. Note that this is no longer an issue with the stdlib
+  ``selectors`` module on Gevent 1.1 and later.
+  (Patch written by Przemysław Węgrzyn.)
+
+
 1.1 (released on 2015-07-15)
 ----------------------------
 
