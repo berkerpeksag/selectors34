@@ -11,6 +11,8 @@ Changelog
   by Gevent. Note that this is no longer an issue with the stdlib
   ``selectors`` module on Gevent 1.1 and later.
   (Patch written by Przemysław Węgrzyn.)
+* Pull request #7: Fix a memory leak when GC is disabled.
+  (Patch written by Max Baryshnikov.)
 
 
 1.1 (released on 2015-07-15)
