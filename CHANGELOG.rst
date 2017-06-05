@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.2 (not released yet)
-----------------------
+1.2 (released on 2017-06-06)
+----------------------------
 
 * Pull request #3: ``wrap_error()`` compatibility layer for PEP 3151 has been
   removed.
