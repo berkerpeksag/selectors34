@@ -1,4 +1,4 @@
-include README.rst CHANGELOG.rst requirements-dev.txt tox.ini
+include README.rst CHANGELOG.rst LICENSE requirements-dev.txt tox.ini
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
